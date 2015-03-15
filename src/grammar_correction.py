@@ -2,13 +2,14 @@ import sys
 import json
 import math
 import nltk
+import datetime
 import itertools
 
 # sbp is the stupid backoff penalty = log(0.4). it's precoded here for efficiency
 def lm_prob(ngram_dict, tags, sbp=-0.916290731874155):
     five_grams = [' '.join(ngram) for ngram in nltk.ngrams(tags, 5, pad_left=True, pad_symbol='<S>')]
     logprob = 0
-    for g5 in five_grams: # need to lookup in the proper dictionary
+    for g5 in five_grams: 
         if g5 in ngram_dict['5']:
             logprob += math.log(ngram_dict['5'][g5] / ngram_dict['4'][g5[:g5.rfind(' ')]])
         else: 
@@ -22,11 +23,11 @@ def lm_prob(ngram_dict, tags, sbp=-0.916290731874155):
                 else:
                     g2 = g3[g3.find(' ')+1:]
                     if g2 in ngram_dict['2']:
-                        logprob += sbp + sbp + sbp + math.log(ngram_dict['2'][g2] / ngram_dict['2'][g2[:g2.rfind(' ')]])
+                        logprob += sbp + sbp + sbp + math.log(ngram_dict['2'][g2] / ngram_dict['1'][g2[:g2.rfind(' ')]])
                     else:
                         g1 = g2[g2.find(' ')+1:]
                         if g1 in ngram_dict['1']:
-                            logprob += sbp + sbp + sbp + sbp + math.log(ngram_dict[g1] / ngram_dict['NUM_TAGS'])
+                            logprob += sbp + sbp + sbp + sbp + math.log(ngram_dict['1'][g1] / ngram_dict['NUM_TAGS'])
                         else:
                             print(g1 + ' not in ngram_dict')
     return logprob
@@ -42,9 +43,14 @@ def main():
 
     with open(sys.argv[1]) as modelfile:
         ngram_dict = json.load(modelfile)
-
+    
     for line in sys.stdin:
         words = line.split()
+
+        if not words:
+            print()
+            continue
+
         enum_words = list(enumerate(words))
         candi = [i for i, word in enum_words if word in homophones]
 
@@ -52,7 +58,7 @@ def main():
             print(line)
             continue
 
-        candidwords = [words[i], flip[words[i]] for i in candi]
+        candidwords = [(words[i], flip[words[i]]) for i in candi]
         candidsets = itertools.product(*candidwords)    
         
         candidates = []
