@@ -5,6 +5,7 @@ My approach is n-gram language modeling of the part-of-speech tags.
 I convert the data into its part-of-speech tags, then apply n-gram language modeling to obtain the probability of a given sentence.
 
 So, for a sentence containing x homophones, I'll do the following:
+
 1. Create 2^x candidate sentences (if x > 6 we do not generate all 2^x candidate sentences)
 2. POS-tag each of the candidate sentences
 3. Run n-gram language model on each sentence to get its probability. (NOTE: I am using the "Stupid-Backoff" model in order to deal with unseen n-grams. This applies a fixed penalty of 0.4 to the probability and then searches for the corresponding n-1-gram.)
