@@ -6,7 +6,7 @@ import datetime
 import itertools
 
 # sbp is the stupid backoff penalty = log(0.4). it's precoded here for efficiency
-def lm_prob(ngram_dict, tags, sbp=-0.916290731874155):
+def lm_prob(ngram_dict, tags, sbp=-3.58351893845611):
     five_grams = [' '.join(ngram) for ngram in nltk.ngrams(tags, 5, pad_left=True, pad_symbol='<S>')]
     logprob = 0
     for g5 in five_grams: 
@@ -43,21 +43,37 @@ def main():
 
     with open(sys.argv[1]) as modelfile:
         ngram_dict = json.load(modelfile)
-    
+
+    outfile = open(sys.argv[2], 'w')
+    auxfile = open(sys.argv[3], 'w')
+
+    counter = 0
+
     for line in sys.stdin:
+        counter += 1
+        if counter % 1000 == 0:
+            print('processed ' + str(counter) + ' lines at ' + str(datetime.datetime.now()))
+
         words = line.split()
 
         if not words:
-            print()
+            outfile.write(line)
+            #print()
             continue
 
         enum_words = list(enumerate(words))
         candi = [i for i, word in enum_words if word in homophones]
 
         if not candi:
-            print(line)
+            outfile.write(line)
+            #print(line)
             continue
 
+        if len(candi) > 6:
+            outfile.write(line)
+            auxfile.write(line)
+            continue
+            
         candidwords = [(words[i], flip[words[i]]) for i in candi]
         candidsets = itertools.product(*candidwords)    
         
@@ -70,7 +86,11 @@ def main():
             candidates.append(' '.join(new_candidate)) # TODO: TEST THIS LOOP
 
         cand_probs= [(sentence, lm_prob(ngram_dict, [token[1] for token in nltk.pos_tag(nltk.word_tokenize(sentence))])) for sentence in candidates]
-        print(max(cand_probs, key=lambda x: x[1])[0])
+        outfile.write(max(cand_probs, key=lambda x: x[1])[0] + '\n')
+        #print(max(cand_probs, key=lambda x: x[1])[0])
+    
+    outfile.close()
+    auxfile.close()
         
 if __name__ == '__main__':
     main()
