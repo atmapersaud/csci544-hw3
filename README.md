@@ -17,7 +17,7 @@ I chose language models because it seemed to be the most logical and natural fit
 
 I chose to model only the POS tags to solve the data sparsity problem. I noticed that each of the homophones we are working with has a different part of speech tag than its counterpart. "Its", "your", and "their" are all possessive pronouns, while "it's", "you're" and "they're" are all personal pronouns followed by a verb. "Too" is an adverb while "to" is just "to" (using the Penn Treebank P.O.S. tagging system). "Loose" is an adjective (except in situations such as when it is following "let") while "lose" is a verb.
 
-So, I figured I cut down the total vocabulary to hundreds of thousands or possibly millions of words down to around 40 part of speech tags, without losing much information for this task. This way I could train with less data than you would need to train with if you were language modeling the words themselves.
+So, I figured I could cut down the total vocabulary to hundreds of thousands or possibly millions of words down to around 40 part of speech tags, without losing much information for this task. This way I could train with less data than you would need to train with if you were language modeling the words themselves.
 
 ## How to run the code
 
