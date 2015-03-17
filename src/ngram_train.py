@@ -6,7 +6,7 @@ import datetime
 import itertools
 
 def extract_document(filename):
-    with open('../data/reuters/training/'+filename, errors='ignore') as curfile:
+    with open('../data/reuters/EncartaUnzipped/'+filename, errors='ignore') as curfile:
         return(curfile.read().replace('\n', ' '))
 
 def update_dict(dictionary, key, gram):
@@ -17,12 +17,12 @@ def update_dict(dictionary, key, gram):
 
 def main():
     print('starting at ' + str(datetime.datetime.now()))
-    documents = (extract_document(filename) for filename in os.listdir('../data/reuters/training'))
-    sentences = itertools.chain.from_iterable(nltk.sent_tokenize(document) for document in documents)
+    documents = (extract_document(filename) for filename in os.listdir('../data/reuters/EncartaUnzipped'))
+    # NOTE: I am ripping off the first two sentences here because of Reuters dataset as well as Encarta dataset
+    sentences = itertools.chain.from_iterable(nltk.sent_tokenize(document)[2:] for document in documents)
 
-    # NOTE: I am ripping off the first sentence here because of Reuters dataset
     print('starting pos_tagging at ' + str(datetime.datetime.now()))
-    tag_sents = [[token[1] for token in nltk.pos_tag(nltk.word_tokenize(sentence))[1:]] for sentence in sentences]
+    tag_sents = [[token[1] for token in nltk.pos_tag(nltk.word_tokenize(sentence))] for sentence in sentences]
     num_sents = len(tag_sents)
 
     print('starting to generate ngrams at ' + str(datetime.datetime.now()))
@@ -35,9 +35,9 @@ def main():
     print('starting to update ngram dict at ' + str(datetime.datetime.now()))
     ngram_dict = { '1': {}, '2': {}, '3': {}, '4': {}, '5': {}, 'NUM_TAGS': 0 }
 
-    ngram_dict['1']['<S>'] = num_sents
-    ngram_dict['2']['<S> <S>'] = num_sents
-    ngram_dict['3']['<S> <S> <S>'] = num_sents
+    ngram_dict['1']['<S>'] = num_sents * 4
+    ngram_dict['2']['<S> <S>'] = num_sents * 3
+    ngram_dict['3']['<S> <S> <S>'] = num_sents * 2
     ngram_dict['4']['<S> <S> <S> <S>'] = num_sents
 
     for unigram in all_1_grams:
